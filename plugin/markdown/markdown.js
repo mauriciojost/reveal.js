@@ -17,6 +17,8 @@
 
 	var DEFAULT_SLIDE_SEPARATOR = '^\r?\n---\r?\n$',
 		DEFAULT_NOTES_SEPARATOR = 'notes?:',
+		DEFAULT_START_IGNORE_SEPARATOR = '^\r?\n-startignore-\r?\n$',
+		DEFAULT_END_IGNORE_SEPARATOR = '^\r?\n-endignore-\r?\n$',
 		DEFAULT_ELEMENT_ATTRIBUTES_SEPARATOR = '\\\.element\\\s*?(.+?)$',
 		DEFAULT_SLIDE_ATTRIBUTES_SEPARATOR = '\\\.slide:\\\s*?(\\\S.+?)$';
 
@@ -91,6 +93,8 @@
 		options = options || {};
 		options.separator = options.separator || DEFAULT_SLIDE_SEPARATOR;
 		options.notesSeparator = options.notesSeparator || DEFAULT_NOTES_SEPARATOR;
+		options.startIgnoreSeparator = options.startIgnoreSeparator || DEFAULT_START_IGNORE_SEPARATOR;
+		options.endIgnoreSeparator = options.endIgnoreSeparator || DEFAULT_END_IGNORE_SEPARATOR;
 		options.attributes = options.attributes || '';
 
 		return options;
@@ -124,6 +128,10 @@
 	 */
 	function slidify( markdown, options ) {
 
+		var ignoreRegex = new RegExp(options.startIgnoreSeparator + "([\\s\\S]+?)" + options.endIgnoreSeparator, "mg");
+
+		markdown = markdown.replace(ignoreRegex, '');
+
 		options = getSlidifyOptions( options );
 
 		var separatorRegex = new RegExp( options.separator + ( options.verticalSeparator ? '|' + options.verticalSeparator : '' ), 'mg' ),
@@ -149,7 +157,7 @@
 			}
 
 			// pluck slide content from markdown input
-			content = markdown.substring( lastIndex, matches.index );
+			content = markdown.substring( lastIndex, matches.index )
 
 			if( isHorizontal && wasHorizontal ) {
 				// add to horizontal stack
@@ -213,6 +221,8 @@
 								separator: section.getAttribute( 'data-separator' ),
 								verticalSeparator: section.getAttribute( 'data-separator-vertical' ),
 								notesSeparator: section.getAttribute( 'data-separator-notes' ),
+								startIgnoreSeparator: section.getAttribute( 'start-ignore-separator' ),
+								endIgnoreSeparator: section.getAttribute( 'end-ignore-separator' ),
 								attributes: getForwardedAttributes( section )
 							});
 						},
@@ -235,6 +245,8 @@
 						separator: section.getAttribute( 'data-separator' ),
 						verticalSeparator: section.getAttribute( 'data-separator-vertical' ),
 						notesSeparator: section.getAttribute( 'data-separator-notes' ),
+						startIgnoreSeparator: section.getAttribute( 'start-ignore-separator' ),
+						endIgnoreSeparator: section.getAttribute( 'end-ignore-separator' ),
 						attributes: getForwardedAttributes( section )
 					});
 
